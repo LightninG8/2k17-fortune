@@ -1,5 +1,4 @@
 (async () => {
-    const someHash = 'BKoCLl4yatVvoPUprPXSRj4HLZz9hRfYRnsYLVUcLFisBOsdCFxnsow7vkxd8K0Cfo3Qml8sRttEphpSubdKuza5CenwZDnrXnwMyXc1BSqgPJk7xj3zCAqQdazNZjXP';
     // ---------- TG WEB APP ----------
     const tg = window.Telegram?.WebApp;
 
@@ -23,60 +22,47 @@
 
     // ---------- Получение переменных пользователя ----------
     const urlParams = new URLSearchParams(window.location.search);
-    const superPrizeAvailable = +urlParams.get('sp') ?? 0;
     const clientId = +urlParams.get('c') ?? 0;
-    const email = urlParams.get('e') ?? '';
 
     const user = await fetch('https://chatter.salebot.pro/api/d40f3d1714be1b726c8d90824525e691/get_variables?client_id=' + clientId).then((res) => res.json());
-    const tgUsername = user['tg_username'] ?? '';
 
     let availableSpins = +user['доступно_вращений'] ?? 0;
     let dealSpins = +user['сделано_вращений'] ?? 0;
     let lastPrize = +user['последний_подарок'] ?? -1;
 
-    const partnerId = +user['partner_id'] ?? 0;
-
     // список призов
     const prizes = [
         {
-            text: 'ЦЕХ ПО ЗАПУСКАМ И ПРОДАЖАМ',
-            dropChance: 1.8,
-            id: 7917509,
+            text: 'Депозит 30.000 рублей',
+            dropChance: 5,
         },
         {
-            text: '15.000 на обучение',
+            text: 'Урок по сториз/рилс на выбор',
             dropChance: 20,
-            id: 7917511,
         },
         {
-            text: 'Персональная стратегия',
-            dropChance: 50.9,
-            id: 7917514,
+            text: 'Инструкция, как закрыть любой проект',
+            dropChance: 30,
         },
         {
-            text: 'Созвон с Леной по стратегии запуска',
-            dropChance: partnerId ? 0 : 11.98,
-            id: 7917515,
+            text: 'Персональная стратегия по выходу на фриланс',
+            dropChance: 20,
         },
         {
-            text: 'Зум, где сделаем тебе автоворонку',
-            dropChance: 0.2,
-            id: 7917516,
+            text: 'Скидка 50% на любой продукт',
+            dropChance: 5,
         },
         {
-            text: 'Бесплатное место Бьюти форт 3.0',
-            dropChance: superPrizeAvailable > 0 ? 0.01 : 0,
-            id: 7917518,
+            text: '5 шагов на фриланс гайд',
+            dropChance: 20,
         },
         {
-            text: 'Доступ к предобучению бьюти форт 3.0',
-            dropChance: 0.6,
-            id: 7917519,
+            text: '50% на клуб + пропуск на вечеринку 2к17',
+            dropChance: 5,
         },
         {
-            text: 'Скидка 50% на флагман',
-            dropChance: 10,
-            id: 7917521,
+            text: 'Депозит 50.000 рублей',
+            dropChance: 5,
         },
     ];
 
@@ -193,9 +179,13 @@
 
     // ---------- Геткурс функции ----------
     function showPrizePopup(index) {
-        document.querySelector('.popup__text').textContent = prizes[index].text;
+        index = index + 1;
         popupElem.classList.remove('hide');
         popupElem.classList.add('fade-in');
+        popupElem.querySelectorAll('.popup__image').forEach((el) => {
+            el.classList.add('hide');
+        });
+        popupElem.querySelector(`.prize-${index}`).classList.remove('hide');
     }
 
     function setSpinsCount() {
@@ -209,40 +199,6 @@
             wheelSpinButtonElem.classList.add('hide');
             wheelNoSpinButtonElem.classList.remove('hide');
         }
-    }
-
-    async function createOrder(id) {
-        // формируем объект params
-        const params = {
-            user: {
-                email: email,
-                addfields: {
-                    'Ник в Telegram': tgUsername,
-                },
-            },
-            system: {
-                refresh_if_exists: 1, // обновлять ли существующего пользователя 1/0 да/нет
-            },
-            deal: {
-                offer_code: id.toString(),
-                deal_cost: 0,
-                funnel_id: '32080',
-            },
-        };
-
-        // кодируем params в base64
-        const paramsBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(params))));
-
-        // создаём FormData
-        const formData = new FormData();
-        formData.append('key', someHash);
-        formData.append('action', 'add');
-        formData.append('params', paramsBase64);
-
-        return await fetch('https://lenaplatoshina.getcourse.ru/pl/api/deals', {
-            method: 'POST',
-            body: formData,
-        });
     }
 
     // ---------- Функции анимации ----------
@@ -321,7 +277,7 @@
         isSpinning = false;
 
         // отправляем подарок в бота
-        fetch('https://chatter.salebot.pro/api/d40f3d1714be1b726c8d90824525e691/callback', {
+        fetch('https://chatter.salebot.pro/api/db88bed76b9c755546bf52e991eb6ead/callback', {
             method: 'POST',
             body: JSON.stringify({
                 message: `${prizeIndex}`,
@@ -334,8 +290,6 @@
         }
         prizes[prizeIndex].dropChance = 0;
         lastPrize = prizeIndex;
-
-        createOrder(prizes[prizeIndex].id);
 
         // Показываем попап
         setTimeout(() => {
@@ -374,11 +328,9 @@
     wheelNoSpinButtonElem.addEventListener('click', onNoSpinButtonClick);
 
     // Принудительно пересчитать размеры колеса и центрировать
-
     window.addEventListener('load', () => {
         document.querySelector('.wheel-img').onload = () => {
             document.querySelector('.wheel__spinner').style.setProperty('--rotate', '0');
         };
     });
-    // });
 })();
