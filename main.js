@@ -24,11 +24,12 @@
     const urlParams = new URLSearchParams(window.location.search);
     const clientId = +urlParams.get('c') ?? 0;
 
-    const user = await fetch('https://chatter.salebot.pro/api/d40f3d1714be1b726c8d90824525e691/get_variables?client_id=' + clientId).then((res) => res.json());
+    const user = await fetch('https://chatter.salebot.pro/api/db88bed76b9c755546bf52e991eb6ead/get_variables?client_id=' + clientId).then((res) => res.json());
 
-    let availableSpins = +user['доступно_вращений'] ?? 0;
-    let dealSpins = +user['сделано_вращений'] ?? 0;
-    let lastPrize = +user['последний_подарок'] ?? -1;
+    let availableSpins = +user['доступно_вращений'] || 0;
+    console.log(availableSpins);
+    let dealSpins = +user['сделано_вращений'] || 0;
+    let lastPrize = +user['последний_подарок'] || -1;
 
     // список призов
     const prizes = [
